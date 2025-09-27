@@ -362,6 +362,35 @@
                 document.getElementById('selectionForm').dispatchEvent(new Event('submit'));
             }
         });
+
+          console.log('Remote page loaded, window.opener:', window.opener);
+  console.log('Remote page loaded, window.parent:', window.parent);
+
+  function testMessage() {
+      const message = {
+          type: 'selection',
+          value: 'test-value-123',
+          text: 'Test selection',
+          parameterName: 'Level',
+          timestamp: new Date().toISOString(),
+          source: 'github-pages-selector'
+      };
+
+      console.log('Sending test message:', message);
+
+      if (window.opener && !window.opener.closed) {
+          console.log('Sending to window.opener');
+          window.opener.postMessage(message, '*');
+      } else {
+          console.log('No opener or opener closed');
+      }
+  }
+
+  // Auto-test after 2 seconds
+  setTimeout(() => {
+      console.log('Auto-testing message after 2 seconds...');
+      testMessage();
+  }, 2000);
     </script>
 </body>
 </html>
