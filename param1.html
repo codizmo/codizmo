@@ -284,26 +284,27 @@
             document.body.classList.add('loading');
             
             try {
-                // Send the selected value back to the parent window
+                // Updated postMessage format for the remote page
                 const message = {
                     type: 'selection',
-                    value: selectedValue,
-                    text: selectedText,
+                    value: selectedValue,           // The actual value to set
+                    text: selectedText,             // Human-readable description (optional)
+                    parameterName: 'Level',         // Optional: specify parameter name 
                     timestamp: new Date().toISOString(),
                     source: 'github-pages-selector'
                 };
 
-                // Send message to parent window
-                window.opener.postMessage(message, EXPECTED_PARENT_ORIGIN);
+                // Send to parent window - the origin will be automatically validated
+                window.parent.postMessage(message, '*');                    
                 
                 showMessage(`✓ Selection "${selectedText}" sent successfully!`, 'success');
                 
                 // Optional: Close window after a delay
                 setTimeout(() => {
-                    showMessage('Closing window in 2 seconds...', 'info');
+                    showMessage('Closing window in 10 seconds...', 'info');
                     setTimeout(() => {
                         window.close();
-                    }, 2000);
+                    }, 10000);
                 }, 1000);
                 
             } catch (error) {
