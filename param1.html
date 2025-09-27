@@ -235,13 +235,15 @@
     </div>
 
     <script>
-        // Expected parent origin for security
-        const EXPECTED_PARENT_ORIGIN = 'https://openscad.jakobsbrunnen.ch';
+        // No hardcoded origins - use dynamic detection
         
         // Check if page was opened by another window (popup mode) or embedded (iframe mode)
         const hasOpener = window.opener !== null && window.opener !== window;
         const isIframe = window.parent !== window;
         const isPopup = hasOpener && !isIframe;
+
+        // Auto-detect which parameter this page should update
+        let targetParameterName = null;
         
         // Display message to user
         function showMessage(text, type = 'info') {
@@ -254,12 +256,31 @@
             }, 5000);
         }
 
+        // Request parameter name from parent window
+        function requestParameterName() {
+            if (isIframe && window.parent) {
+                window.parent.postMessage({
+                    type: 'request-parameter-name',
+                    timestamp: new Date().toISOString(),
+                    source: 'parameter-selector'
+                }, '*');
+            } else if (isPopup && window.opener) {
+                window.opener.postMessage({
+                    type: 'request-parameter-name',
+                    timestamp: new Date().toISOString(),
+                    source: 'parameter-selector'
+                }, '*');
+            }
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             if (isIframe) {
-                showMessage('✓ Running in iframe mode. Please make your selection.', 'success');
+                showMessage('✓ Running in iframe mode. Detecting parameter...', 'success');
+                requestParameterName();
             } else if (isPopup) {
-                showMessage('✓ Running in popup mode. Please make your selection.', 'success');
+                showMessage('✓ Running in popup mode. Detecting parameter...', 'success');
+                requestParameterName();
             } else {
                 showMessage('⚠️ This page should be opened from the OpenSCAD editor. It appears you opened it directly.', 'error');
                 document.getElementById('submitBtn').disabled = true;
@@ -293,9 +314,9 @@
                     type: 'selection',
                     value: selectedValue,           // The actual value to set
                     text: selectedText,             // Human-readable description (optional)
-                    parameterName: 'Level',         // Optional: specify parameter name 
+                    parameterName: targetParameterName || 'Level', // Use detected name or fallback
                     timestamp: new Date().toISOString(),
-                    source: 'github-pages-selector'
+                    source: 'parameter-selector'
                 };
 
                 // Send message based on mode
@@ -334,7 +355,7 @@
                     const cancelMessage = {
                         type: 'selection-cancelled',
                         timestamp: new Date().toISOString(),
-                        source: 'github-pages-selector'
+                        source: 'parameter-selector'
                     };
 
                     if (isIframe) {
@@ -355,9 +376,11 @@
 
         // Listen for messages from parent (optional - for bidirectional communication)
         window.addEventListener('message', function(event) {
-            // Security check
-            if (event.origin !== EXPECTED_PARENT_ORIGIN) {
-                console.warn('Received message from unexpected origin:', event.origin);
+            // Basic security check - only respond to messages from opener/parent
+            const isFromValidSource = (isIframe && event.source === window.parent) ||
+                                    (isPopup && event.source === window.opener);
+
+            if (!isFromValidSource) {
                 return;
             }
 
@@ -368,6 +391,10 @@
                     type: 'pong',
                     timestamp: new Date().toISOString()
                 }, event.origin);
+            } else if (event.data.type === 'parameter-name-response') {
+                // Receive the parameter name from parent
+                targetParameterName = event.data.parameterName;
+                showMessage(`✓ Parameter detected: ${targetParameterName}. Please make your selection.`, 'success');
             }
         });
 
@@ -386,9 +413,9 @@
                 type: 'selection',
                 value: customValue,
                 text: 'Test selection',
-                parameterName: 'Level',
+                parameterName: targetParameterName || 'Level',
                 timestamp: new Date().toISOString(),
-                source: 'github-pages-selector'
+                source: 'parameter-selector'
             };
 
             if (isIframe) {
