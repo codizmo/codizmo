@@ -81,11 +81,17 @@
          * - Sends selected value back to parent via postMessage
          *
          * INTEGRATION:
-         * In OpenSCAD parameter comments, use:
-         *   // param Level [Level]: Description [Link Text](https://example.com/getpval.html)
-         *   // param Level [Level]: Description [Link Text](https://example.com/getpval.html#)
+         * In your OpenSCAD code use parameter definitions as follows
          *
-         * The # suffix determines iframe (with #) vs popup (without #) mode.
+         *    // [Set the value here](https://mataebi.github.io/openscad/getpval)
+         *    Level = "unknown"; 
+         *
+         *    // [Set the value here](https://mataebi.github.io/openscad/getpval#)
+         *    Level2 = "unknown"; 
+         *
+         * The '#' suffix determines iframe (with #) vs popup (without #) mode.
+         * As shown above, you may use the same parameter creation page for more than
+         * one paramter if that works for the use case.
          */
 
         // Detect context: iframe or popup window
