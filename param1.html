@@ -294,18 +294,19 @@
                     source: 'github-pages-selector'
                 };
 
-                // Send to parent window - the origin will be automatically validated
-                window.parent.postMessage(message, '*');                    
+                // Send to opener window - the origin will be automatically validated
+                window.opener.postMessage(message, '*');                    
                 
                 showMessage(`✓ Selection "${selectedText}" sent successfully!`, 'success');
-                
-                // Optional: Close window after a delay
-                setTimeout(() => {
-                    showMessage('Closing window in 10 seconds...', 'info');
-                    setTimeout(() => {
-                        window.close();
-                    }, 10000);
-                }, 1000);
+
+                // Optional: Close window after a delay (disabled for now)
+                // Uncomment to enable auto-close after sending:
+                // setTimeout(() => {
+                //     showMessage('Closing window in 3 seconds...', 'info');
+                //     setTimeout(() => {
+                //         window.close();
+                //     }, 3000);
+                // }, 1000);
                 
             } catch (error) {
                 showMessage(`Error sending data: ${error.message}`, 'error');
@@ -363,34 +364,37 @@
             }
         });
 
-          console.log('Remote page loaded, window.opener:', window.opener);
-  console.log('Remote page loaded, window.parent:', window.parent);
+        // Debug logging for development
+        console.log('Remote page loaded, window.opener:', window.opener);
+        console.log('Remote page loaded, window.parent:', window.parent);
 
-  function testMessage() {
-      const message = {
-          type: 'selection',
-          value: 'test-value-123',
-          text: 'Test selection',
-          parameterName: 'Level',
-          timestamp: new Date().toISOString(),
-          source: 'github-pages-selector'
-      };
+        // Manual test function for debugging (can be called from console)
+        window.testMessage = function(customValue = 'test-value-123') {
+            const message = {
+                type: 'selection',
+                value: customValue,
+                text: 'Test selection',
+                parameterName: 'Level',
+                timestamp: new Date().toISOString(),
+                source: 'github-pages-selector'
+            };
 
-      console.log('Sending test message:', message);
+            console.log('Sending test message:', message);
 
-      if (window.opener && !window.opener.closed) {
-          console.log('Sending to window.opener');
-          window.opener.postMessage(message, '*');
-      } else {
-          console.log('No opener or opener closed');
-      }
-  }
+            if (window.opener && !window.opener.closed) {
+                console.log('Sending to window.opener');
+                window.opener.postMessage(message, '*');
+            } else {
+                console.log('No opener or opener closed');
+            }
+        };
 
-  // Auto-test after 2 seconds
-  setTimeout(() => {
-      console.log('Auto-testing message after 2 seconds...');
-      testMessage();
-  }, 2000);
+        // Auto-test disabled for normal operation
+        // Uncomment the lines below for testing:
+        // setTimeout(() => {
+        //     console.log('Auto-testing message after 10 seconds...');
+        //     testMessage('auto-test-value');
+        // }, 10000);
     </script>
 </body>
 </html>
