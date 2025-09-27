@@ -21,3 +21,5 @@ It is possible to provide multiple pages in a GitHub Pages repository, but there
 - index.html serves as the homepage
 - howto.html would be accessible at username.github.io/repository-name/howto.html
 - You can omit the .html in the URL (username.github.io/repository-name/howto) and it will still work
+
+> Please note that after making changes (to .md files in particular) it will usually take a few minutes before they are published on GitHub Pages
