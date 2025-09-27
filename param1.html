@@ -238,8 +238,10 @@
         // Expected parent origin for security
         const EXPECTED_PARENT_ORIGIN = 'https://openscad.jakobsbrunnen.ch';
         
-        // Check if page was opened by another window
+        // Check if page was opened by another window (popup mode) or embedded (iframe mode)
         const hasOpener = window.opener !== null && window.opener !== window;
+        const isIframe = window.parent !== window;
+        const isPopup = hasOpener && !isIframe;
         
         // Display message to user
         function showMessage(text, type = 'info') {
@@ -254,11 +256,15 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            if (!hasOpener) {
+            console.log('Page mode detection:', { hasOpener, isIframe, isPopup });
+
+            if (isIframe) {
+                showMessage('✓ Running in iframe mode. Please make your selection.', 'success');
+            } else if (isPopup) {
+                showMessage('✓ Running in popup mode. Please make your selection.', 'success');
+            } else {
                 showMessage('⚠️ This page should be opened from the OpenSCAD editor. It appears you opened it directly.', 'error');
                 document.getElementById('submitBtn').disabled = true;
-            } else {
-                showMessage('✓ Connected to parent window. Please make your selection.', 'success');
             }
         });
 
@@ -275,7 +281,7 @@
                 return;
             }
 
-            if (!hasOpener) {
+            if (!isIframe && !isPopup) {
                 showMessage('Cannot send data: No parent window detected.', 'error');
                 return;
             }
@@ -294,8 +300,16 @@
                     source: 'github-pages-selector'
                 };
 
-                // Send to opener window - the origin will be automatically validated
-                window.opener.postMessage(message, '*');                    
+                // Send message based on mode
+                if (isIframe) {
+                    // Iframe mode: send to parent
+                    console.log('Sending message to parent (iframe mode):', message);
+                    window.parent.postMessage(message, '*');
+                } else if (isPopup) {
+                    // Popup mode: send to opener
+                    console.log('Sending message to opener (popup mode):', message);
+                    window.opener.postMessage(message, '*');
+                }                    
                 
                 showMessage(`✓ Selection "${selectedText}" sent successfully!`, 'success');
 
@@ -318,14 +332,20 @@
 
         // Handle cancel button
         document.getElementById('cancelBtn').addEventListener('click', function() {
-            if (hasOpener) {
+            if (isIframe || isPopup) {
                 // Send cancel message to parent
                 try {
-                    window.opener.postMessage({
+                    const cancelMessage = {
                         type: 'selection-cancelled',
                         timestamp: new Date().toISOString(),
                         source: 'github-pages-selector'
-                    }, EXPECTED_PARENT_ORIGIN);
+                    };
+
+                    if (isIframe) {
+                        window.parent.postMessage(cancelMessage, '*');
+                    } else if (isPopup) {
+                        window.opener.postMessage(cancelMessage, '*');
+                    }
                 } catch (error) {
                     console.error('Error sending cancel message:', error);
                 }
@@ -379,13 +399,16 @@
                 source: 'github-pages-selector'
             };
 
-            console.log('Sending test message:', message);
+            console.log('Sending test message:', message, { isIframe, isPopup });
 
-            if (window.opener && !window.opener.closed) {
-                console.log('Sending to window.opener');
+            if (isIframe) {
+                console.log('Sending to window.parent (iframe mode)');
+                window.parent.postMessage(message, '*');
+            } else if (isPopup) {
+                console.log('Sending to window.opener (popup mode)');
                 window.opener.postMessage(message, '*');
             } else {
-                console.log('No opener or opener closed');
+                console.log('No valid parent or opener detected');
             }
         };
 
