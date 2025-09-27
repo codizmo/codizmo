@@ -1,5 +1,7 @@
 # Parameter Help for the Online OpenSCAD Renderer 
 
+[More information](HOWTO)
+
 ## Simple explanation
 To show a simple explanation underneath a parameter field add a comment above it
 
