@@ -1,4 +1,4 @@
-# Parameter Help for the Online Codizmo Parametrizer 
+# Parameter Help for the Codizmo Parametrizer 
 
 [More information](HOWTO.md)
 
