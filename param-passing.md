@@ -2,20 +2,25 @@
 
 Here's how the external URL parameter handling works:
 
-## Integration Summary
+- Codizmo uses the OpenSCAD parameter comment syntax with an small extension allowing to specify external URLs. Remote pages opend this way, can then send parameter values back to update the UI element for that specific parameter.
 
-### For the UI side
+- External URLs in OpenSCAD comments like `// [Set the value here](https://codizmo.github.io/codizmo/getpval)
+` are detected by Codizmo's link parsing system and show the remote page in a new window. This may just be a static web page providing extended explanations about a parameter or an interavtive web UI allowing the user define parameter values with any UI needed to do this in the best possible way. 
 
-  1. Parameter URLs: External URLs in OpenSCAD comments like // [Set the value 
-  here](https://mataebi.github.io/openscad/param1#) are detected by the existing link parsing system
-  2. IframeOverlay: Enhanced to listen for postMessage events from external URLs and validate
-  origins for security
-  3. Parameter Updates: When a postMessage is received, it updates the corresponding parameter value
-   and closes the overlay
-  4. Parameter Tracking: The system tracks which parameter each external URL belongs to
+- If the external URLs in an OpenSCAD comment is ended with a `#` like `// [Set the value here](https://codizmo.github.io/codizmo/getpval#)` the remote page will be shown in an iFrame. If the remote system does not allow to have its pages shown in an iFrame, Codizmo will fall back to a new browser window to show the remote UI page.
 
-### For the remote page
-  For your remote page, use the following postMessage format
+- After showing the remote page in an iFrame or a new brwoser window, Codizmo waits for a postMessage event from the external URL and validates the origin URL of the message to improve the level of security. It only accepts messages from the same origin as the original remoteURL.
+
+- After a postMessage from the remote page is received, Codizmo updates the corresponding parameter value
+   and closes the window or iFrame.
+
+- Codizmo automatically tracks from which parameter the remote page has been called and writes the value entered into that specific parameter field. This makes it possible to use the same remote page for multiple parameters in parallel.
+
+- In addtition to the automated parameter / remote page matching, a remote page may optionally specify the parameterName in the message posted to route the value returned to that parameter.
+
+
+## On the remote page
+  For your remote page, use the following postMessage format to send the value entered by the user back to Codizmo
 
 ```Javascript
   // Updated postMessage format for the remote page
@@ -31,15 +36,3 @@ Here's how the external URL parameter handling works:
   // Send to parent window - the origin will be automatically validated
   window.parent.postMessage(message, '*');
 ```
-
-## Key features
-  - Security: Only accepts messages from the same origin as the iframe URL
-  - Automatic parameter detection: The UI knows which parameter the external URL belongs to based on
-   the comment context
-  - Flexible parameter naming: The remote page can optionally specify parameterName in the message,
-  otherwise it uses the detected parameter
-  - Auto-close: The iframe overlay closes automatically after receiving a valid selection
-  - Validation: Basic validation ensures messages come from expected sources
-
-  The system will work with the existing OpenSCAD Editor comment syntax and the external URL will be able
-  to send parameter values back to update the UI element for that specific parameter.
