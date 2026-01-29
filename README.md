@@ -1,6 +1,6 @@
 # Parameter Help for the Online Codizmo Parametrizer 
 
-[More information](HOWTO)
+[More information](HOWTO.md)
 
 ## Simple explanations
 To show a simple explanation above a parameter field, add a comment above it. This will show the name of the parameter «Copies» followed by the explanation «Set the number of copies here»
