@@ -31,7 +31,7 @@ great_idea = true;
 ## Extended explanations in iFrames or on external pages
 If a parameter needs more than a simple explanation, [create a web page documenting it](HOWTO.md) and write the link to it in Markdown notation.
 ```
-// Find more information [here](https://codizmo.github.io/codizmo/# "More information about extended  comments")
+// Find more information [here](https://codizmo.github.io/extpages/# "More information about extended  comments")
 multiple_divisions = "10, 30, 70";
 ```
 A page like that is opened in a separate window/tab by default. But if you add a hashtag at the end of the URL, it will be opened in an iFrame on the same page. Note, however, that many web servers do not allow their content to be shown in an iFrame. So make sure that there is no `#` at the end of the URL in these cases.
