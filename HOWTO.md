@@ -1,4 +1,4 @@
-# How to publish content on «GitHub Pages»
+# How to publish web pages using «GitHub Pages»
 
 ## Starting with «GitHub Pages»
 
